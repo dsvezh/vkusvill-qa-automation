@@ -1,6 +1,12 @@
 # Compiled class file
 *.class
 
+# Gradle and IntelliJ IDEA
+.gradle/
+build/
+.idea/
+*.iml
+
 # Log file
 *.log
 
@@ -12,6 +18,7 @@
 
 # Package Files #
 *.jar
+!/gradle/wrapper/gradle-wrapper.jar
 *.war
 *.nar
 *.ear
