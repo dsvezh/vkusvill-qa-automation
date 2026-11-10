@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'io.qameta.allure' version '4.3.0'
 }
 
 java {
@@ -15,7 +16,25 @@ repositories {
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.11.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'com.codeborne:selenide:7.19.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+allure {
+    version = '2.42.1'
+    report {
+        singleFile.set(true)
+    }
+    adapter {
+        aspectjWeaver.set(true)
+        frameworks {
+            jupiter
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 tasks.named('test') {
