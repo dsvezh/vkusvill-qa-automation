@@ -7,11 +7,11 @@ import org.openqa.selenium.WebElement;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
 import static com.codeborne.selenide.Condition.exactText;
-import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.openqa.selenium.support.ui.ExpectedConditions.stalenessOf;
 
 public class CatalogPage {
+
+    private static final String REGULAR_PRICE_SELECTOR = ".Price._last";
 
     private final SelenideElement heading = $(".js-catalog-h1");
     private final ElementsCollection categoryLinks = $$(".VVCategCards2020__ItemTitle");
@@ -60,23 +62,36 @@ public class CatalogPage {
         return this;
     }
 
-    @Step("Проверить, что цены без карты лояльности идут по возрастанию")
+    @Step("Проверить, что обычные цены идут по возрастанию")
     public CatalogPage shouldHaveAscendingPrices() {
         List<BigDecimal> prices = catalogPrices();
         assertTrue(prices.size() >= 2, "Для проверки нужны как минимум две цены");
+        assertHaveDifferentPrices(prices);
         assertEquals(prices.stream().sorted().toList(), prices, "Цены должны идти по возрастанию");
         return this;
+    }
+
+    @Step("Проверить, что обычные цены идут по убыванию")
+    public CatalogPage shouldHaveDescendingPrices() {
+        List<BigDecimal> prices = catalogPrices();
+        assertTrue(prices.size() >= 2, "Для проверки нужны как минимум две цены");
+        assertHaveDifferentPrices(prices);
+        assertEquals(prices.stream().sorted(Comparator.reverseOrder()).toList(), prices,
+                "Цены должны идти по убыванию");
+        return this;
+    }
+
+    private void assertHaveDifferentPrices(List<BigDecimal> prices) {
+        assertTrue(prices.stream().anyMatch(price -> price.compareTo(prices.get(0)) != 0),
+                "Для проверки смены сортировки нужны как минимум две разные цены");
     }
 
     public List<BigDecimal> catalogPrices() {
         List<BigDecimal> prices = new ArrayList<>();
         for (SelenideElement price : currentPrices.filterBy(visible).shouldHave(sizeGreaterThan(1)).asFixedIterable()) {
             String priceText = price.getOwnText();
-            SelenideElement regularPrice = price.parent().$(".Price._last");
-            SelenideElement priceNotice = price.closest(".ProductCard__priceBlock").$(".ProductCard__notice");
-            if (regularPrice.isDisplayed()
-                    && (priceNotice.has(text("по карте лояльности"))
-                    || priceNotice.has(text("при покупке от")))) {
+            SelenideElement regularPrice = price.parent().$(REGULAR_PRICE_SELECTOR);
+            if (regularPrice.isDisplayed()) {
                 priceText = regularPrice.getOwnText();
             }
             prices.add(parsePrice(priceText));

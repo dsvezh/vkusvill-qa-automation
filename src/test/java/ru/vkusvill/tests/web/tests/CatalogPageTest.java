@@ -47,13 +47,15 @@ class CatalogPageTest extends TestBase {
     }
 
     @Test
-    @DisplayName("Товары сортируются по возрастанию цены")
+    @DisplayName("Товары сортируются сначала по убыванию, затем по возрастанию цены")
     @Owner("QA")
     @Severity(NORMAL)
-    void sortsProductsByAscendingPrice() {
+    void sortsProductsByDescendingThenAscendingPrice() {
         homePage.openHome()
                 .openCatalog();
         catalogPage.openCategory(DAIRY)
+                .selectSorting("Сначала дороже")
+                .shouldHaveDescendingPrices()
                 .selectSorting("Сначала дешевле")
                 .shouldHaveAscendingPrices();
     }
