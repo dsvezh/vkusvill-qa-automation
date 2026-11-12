@@ -7,6 +7,7 @@ import io.qameta.allure.Severity;
 import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.vkusvill.tests.web.pages.CatalogPage;
 import ru.vkusvill.tests.web.pages.HomePage;
 import ru.vkusvill.tests.web.pages.ProductPage;
 import ru.vkusvill.tests.web.pages.SearchPage;
@@ -21,6 +22,7 @@ import static io.qameta.allure.SeverityLevel.NORMAL;
 class ProductPageTest extends TestBase {
 
     private final HomePage homePage = new HomePage();
+    private final CatalogPage catalogPage = new CatalogPage();
     private final SearchPage searchPage = new SearchPage();
     private final ProductPage productPage = new ProductPage();
 
@@ -42,8 +44,14 @@ class ProductPageTest extends TestBase {
     @Owner("QA")
     @Severity(NORMAL)
     void showsCompositionAndNutrition() {
-        productPage.openProduct("/goods/moloko-2-36296/")
-                .shouldShowComposition()
+        String category = "Молочные продукты, яйцо";
+
+        homePage.openHome()
+                .openCatalog();
+        catalogPage.openCategory(category)
+                .shouldShowProductsIn(category)
+                .openFirstProduct();
+        productPage.shouldShowComposition()
                 .shouldShowNutrition();
     }
 }

@@ -52,6 +52,13 @@ public class CatalogPage {
         return this;
     }
 
+    @Step("Открыть первый видимый товар из каталога")
+    public CatalogPage openFirstProduct() {
+        SelenideElement product = products.filterBy(visible).shouldHave(sizeGreaterThan(0)).first();
+        product.click();
+        return this;
+    }
+
     @Step("Выбрать сортировку «{option}»")
     public CatalogPage selectSorting(String option) {
         WebElement firstProduct = products.first().shouldBe(visible).toWebElement();
