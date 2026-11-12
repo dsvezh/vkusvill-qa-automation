@@ -16,6 +16,7 @@ import static io.qameta.allure.SeverityLevel.NORMAL;
 @Epic("ВкусВилл")
 @Feature("Каталог")
 @Story("Просмотр ассортимента")
+@DisplayName("Каталог товаров")
 class CatalogPageTest extends TestBase {
 
     private static final String DAIRY = "Молочные продукты, яйцо";

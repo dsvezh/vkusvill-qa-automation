@@ -17,14 +17,4 @@
 sh ./gradlew cleanTest test allureReport --clean
 ```
 
-Параметры можно переопределить системными свойствами `-D`.
-
-| Свойство | Значение по умолчанию |
-|---|---|
-| `baseUrl` | `https://vkusvill.ru` |
-| `browser` | `chrome` |
-| `browserVersion` | Пустое значение, используется доступная локальная версия |
-| `browserSize` | `1440x1000` |
-| `headless` | `false`. Для запуска без окна передайте `-Dheadless=true` |
-
 Allure сохраняет результаты в `build/allure-results`. Задача `cleanTest` очищает результаты предыдущего прогона. Готовый отчёт можно открыть в браузере из файла `build/reports/allure-report/allureReport/index.html`.

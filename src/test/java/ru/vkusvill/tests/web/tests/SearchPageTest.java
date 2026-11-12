@@ -16,6 +16,7 @@ import static io.qameta.allure.SeverityLevel.NORMAL;
 @Epic("ВкусВилл")
 @Feature("Поиск товаров")
 @Story("Поиск по названию")
+@DisplayName("Поиск товаров")
 class SearchPageTest extends TestBase {
 
     private final HomePage homePage = new HomePage();

@@ -1,67 +1,65 @@
 package ru.vkusvill.tests.web.tests;
 
 import com.codeborne.selenide.Configuration;
-import com.codeborne.selenide.Selenide;
-import com.codeborne.selenide.WebDriverRunner;
-import io.qameta.allure.Allure;
+import io.qameta.allure.selenide.AllureSelenide;
+import com.codeborne.selenide.logevents.SelenideLogger;
+import helpers.Attach;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.WebDriverException;
-import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.logging.LoggingPreferences;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
-import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.logging.Level;
+import java.util.Map;
+
+import static com.codeborne.selenide.Selenide.closeWebDriver;
+import static com.codeborne.selenide.WebDriverRunner.hasWebDriverStarted;
 
 abstract class TestBase {
 
     @BeforeAll
     static void configureBrowser() {
+        SelenideLogger.addListener("allure", new AllureSelenide()
+                .screenshots(true)
+                .savePageSource(true));
         Configuration.baseUrl = System.getProperty("baseUrl", "https://vkusvill.ru");
         Configuration.browserSize = System.getProperty("browserSize", "1920x1080");
+        Configuration.browserVersion = System.getProperty("browserVersion", "");
         Configuration.headless = Boolean.parseBoolean(System.getProperty("headless", "false"));
         Configuration.pageLoadStrategy = "eager";
         Configuration.timeout = 10_000;
-
-        LoggingPreferences logging = new LoggingPreferences();
-        logging.enable(LogType.BROWSER, Level.ALL);
-        if ("chrome".equals(Configuration.browser)) {
-            Configuration.browserCapabilities.setCapability("goog:loggingPrefs", logging);
+        String remoteUrl = System.getProperty("remoteUrl", "");
+        Configuration.remote = remoteUrl.isBlank() ? null : remoteUrl;
+        if (Configuration.remote != null) {
+            DesiredCapabilities capabilities = new DesiredCapabilities();
+            capabilities.setCapability("selenoid:options", Map.of(
+                    "enableVNC", true,
+                    "enableVideo", true
+            ));
+            Configuration.browserCapabilities = capabilities;
         }
+
     }
 
     @AfterEach
-    void attachBrowserArtifactsAndClose() {
-        if (!WebDriverRunner.hasWebDriverStarted()) {
-            return;
-        }
-
+    void closeBrowser() {
         try {
-            attachScreenshot();
-            attachBrowserLogs();
+            if (hasWebDriverStarted()) {
+                addAttachment("Скриншот", () -> Attach.screenshotAs("Последний скриншот"));
+                addAttachment("Исходный код страницы", () -> Attach.pageSource());
+                addAttachment("Логи консоли браузера", () -> Attach.browserConsoleLogs());
+                if (Configuration.remote != null) {
+                    addAttachment("Видеозапись теста", () -> Attach.addVideo());
+                }
+            }
         } finally {
-            Selenide.closeWebDriver();
+            closeWebDriver();
         }
     }
 
-    private void attachScreenshot() {
+    private void addAttachment(String name, Runnable action) {
         try {
-            byte[] screenshot = Selenide.screenshot(OutputType.BYTES);
-            Allure.addAttachment("Скриншот страницы", "image/png", new ByteArrayInputStream(screenshot), ".png");
-        } catch (WebDriverException exception) {
-            Allure.addAttachment("Ошибка создания скриншота", exception.toString());
-        }
-    }
-
-    private void attachBrowserLogs() {
-        try {
-            List<String> logs = Selenide.getWebDriverLogs(LogType.BROWSER, Level.ALL);
-            String contents = logs.isEmpty() ? "Консоль браузера пуста" : String.join("\n", logs);
-            Allure.addAttachment("Логи браузера", "text/plain", contents);
-        } catch (UnsupportedOperationException | WebDriverException exception) {
-            Allure.addAttachment("Ошибка получения логов браузера", exception.toString());
+            action.run();
+        } catch (RuntimeException e) {
+            Attach.attachAsText("Ошибка вложения: " + name, e.toString());
         }
     }
 }
