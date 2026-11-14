@@ -52,6 +52,6 @@ class ProductPageTest extends TestBase {
                 .shouldShowProductsIn(category)
                 .openFirstProduct();
         productPage.shouldShowComposition()
-                .shouldShowNutrition();
+                .shouldShowNutrition("Ккал", "Белки, г", "Жиры, г", "Углеводы, г");
     }
 }
