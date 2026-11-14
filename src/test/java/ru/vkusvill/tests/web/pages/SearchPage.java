@@ -13,7 +13,7 @@ import static com.codeborne.selenide.Selenide.$$;
 public class SearchPage {
 
     private final ElementsCollection productNames =
-            $$("#section_lvl2 .ProductCard__link .js-product-v-tizer__title-text");
+            $$("#section_lvl2 .js-product-v-tizer__title-text");
     private final SelenideElement emptyMessage = $(".VV23_SearchPageEmptyBlock__HeaderCol._text");
 
     @Step("Проверить, что в выдаче есть товар по запросу «{query}»")
@@ -23,8 +23,8 @@ public class SearchPage {
     }
 
     @Step("Проверить сообщение об отсутствии товаров и пустую выдачу для запроса «{query}»")
-    public SearchPage shouldHaveNoResultsFor(String query) {
-        emptyMessage.shouldBe(visible).shouldHave(text("Ничего не найдено"), text(query));
+    public SearchPage shouldHaveNoResultsFor(String expectedMessage, String query) {
+        emptyMessage.shouldBe(visible).shouldHave(text(expectedMessage), text(query));
         productNames.shouldBe(empty);
         return this;
     }

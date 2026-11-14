@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import ru.vkusvill.tests.web.pages.HomePage;
 import ru.vkusvill.tests.web.pages.SearchPage;
 
+import java.util.UUID;
+
 import static io.qameta.allure.SeverityLevel.CRITICAL;
 import static io.qameta.allure.SeverityLevel.NORMAL;
 
@@ -39,10 +41,10 @@ class SearchPageTest extends TestBase {
     @Owner("QA")
     @Severity(NORMAL)
     void showsEmptySearchResults() {
-        String query = "zxqv998xxyy";
+        String query = "test-no-product-" + UUID.randomUUID().toString().replace("-", "");
 
         homePage.openHome()
                 .search(query);
-        searchPage.shouldHaveNoResultsFor(query);
+        searchPage.shouldHaveNoResultsFor("Ничего не найдено по запросу:", query);
     }
 }
